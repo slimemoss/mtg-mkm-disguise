@@ -7,10 +7,12 @@ export interface MtgCard {
   jname: string,
   imageurl: string,
   backimageurl?: string | null,
-  layout?: string | null
+  layout?: string | null,
+  disguise_mv: number,
+  disguise_color: string[]
 }
 
-declare module '~/data/LTR.json' {
+declare module '~/data/MKM-disguise.json' {
   const data: MtgCard;
   export default data;
 }

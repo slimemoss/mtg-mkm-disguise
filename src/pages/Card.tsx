@@ -6,7 +6,7 @@ import { TbRepeat } from 'react-icons/tb'
 import { AiOutlineRotateRight } from "react-icons/ai"
 import {isMobile} from 'react-device-detect'
 
-import { MtgCard } from '../data/LTR'
+import { MtgCard } from '../data/MtgCard'
 
 interface Props {
   card: MtgCard

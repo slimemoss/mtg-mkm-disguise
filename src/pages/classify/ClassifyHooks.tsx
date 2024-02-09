@@ -1,15 +1,18 @@
 import * as React from 'react'
-import { MtgCard } from '../../data/LTR'
+import { MtgCard } from '../../data/MtgCard'
 
 export interface Config {
   rarity: Set<string>
+  color: Set<string>
 }
 const defaultConfig: Config = {
-  rarity: new Set([]),
+  rarity: new Set(['common', 'uncommon']),
+  color: new Set([])
 }
 
 export interface ClassifyHooksI {
   setRarity: (rarity: string, add: boolean) => void
+  setColor: (color: string, add: boolean) => void
   classify: (cards: MtgCard[]) => MtgCard[]
 }
 
@@ -25,49 +28,49 @@ export const useClassify = (): [Config, ClassifyHooksI] => {
     setConfig({...config})
   }
 
+  const setColor = (color: string, add: boolean) => {
+    if(add) {
+      config.color.add(color)
+    } else {
+      config.color.delete(color)
+    }
+    setConfig({...config})
+  }
+
   const classify = (cards: MtgCard[]): MtgCard[] => {
-    const filter = (cards: MtgCard[], rarity: Set<string>): MtgCard[] => {
+    const filter = (cards: MtgCard[], rarity: Set<string>, color: Set<string>): MtgCard[] => {
       // filter rarity
       if (rarity.size != 0) {
         cards = cards.filter((c) => (
           rarity.has(c.rarity)
         ))
       }
+
+      // filter color
+      if (color.size != 0) {
+        cards = cards.filter((c) => {
+          if (c.disguise_color.length == 0) { return true }
+
+          var enable = false
+          c.disguise_color.forEach(dc => {
+            enable = enable || color.has(dc)
+          })
+          return enable
+        })
+      }
       return cards
     }
-    const fillEmpty = (cards: MtgCard[]): MtgCard[] => {
-      const defaultMtgCard: MtgCard = {
-        colorIdentity: [],
-        manaValue: 0,
-        rarity: '',
-        number: '',
-        types: [],
-        jname: '',
-        imageurl: 'https://cards.scryfall.io/back.png',
-        backimageurl: null,
-      }
 
-      const maxNumber = Math.max(...cards.map(c => parseInt(c.number)))
-
-      const idx = [...Array(maxNumber).keys()]
-      const res: MtgCard[] = idx.map(i => {
-        const org = cards.filter(c => parseInt(c.number) == i + 1)
-        if(org.length != 0) {
-          return org[0]
-        } else {
-          const number = (i+1).toString()
-          return {...defaultMtgCard, number}
-        }
-      })
-
-      return res
+    const sort = (cards: MtgCard[]): MtgCard[] => {
+      cards.sort((a, b) => (a.disguise_mv - b.disguise_mv))
+      return cards
     }
 
     cards = cards.concat()
-    cards = fillEmpty(cards)
-    cards = filter(cards, config.rarity)
+    cards = filter(cards, config.rarity, config.color)
+    cards = sort(cards)
     return cards
   }
 
-  return [config, {setRarity, classify}]
+  return [config, {setRarity, setColor, classify}]
 }

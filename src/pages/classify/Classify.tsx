@@ -22,6 +22,17 @@ export const Classify = (props: Props) => {
           />
         ))}
       </div>
+
+      <div style={{display: 'flex', flexWrap: 'wrap', gap: '1rem'}}>
+        <Form.Label>変装コスト</Form.Label>
+        {[["W", "W"], ["U", "U"], ["B", "B"], ["R", "R"], ["G", "G"]].map((v, i) => (
+          <Form.Check
+            key={i} type="checkbox" label={v[1]} checked={config.color.has(v[0])}
+            onChange={(e) => hooks.setColor(v[0], e.target.checked)}
+          />
+        ))}
+      </div>
+
     </Form>
   </>
 }
